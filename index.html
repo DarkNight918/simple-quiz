@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Quiz App</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f5f5f5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+      }
+
+      header {
+        background: #333;
+        color: #fff;
+        width: 100%;
+        padding: 1rem;
+        text-align: center;
+      }
+
+      .container {
+        max-width: 500px;
+        margin: 2rem auto;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      h1,
+      h2,
+      p {
+        margin: 0 0 1rem 0;
+      }
+
+      h1 {
+        margin-bottom: 2rem;
+        text-align: center;
+      }
+
+      .btn,
+      button {
+        background: #007bff;
+        color: #fff;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        margin: 0.5rem 0;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 1rem;
+      }
+
+      .btn:hover {
+        background: #0056b3;
+      }
+
+      .answers {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .answers button {
+        margin: 0.5rem 0;
+        text-align: left;
+      }
+
+      .correct {
+        background: #28a745 !important;
+      }
+
+      .incorrect {
+        background: #dc3545 !important;
+      }
+
+      .controls {
+        text-align: center;
+        margin-top: 1.5rem;
+      }
+
+      .score-section {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h2>My Interactive Quiz</h2>
+    </header>
+    <div class="container">
+      <div id="start-screen">
+        <h1>Welcome to the Quiz</h1>
+        <p>
+          Test your knowledge with a few fun questions. Click "Start Quiz" to
+          begin!
+        </p>
+        <button class="btn" id="start-btn">Start Quiz</button>
+      </div>
+
+      <div id="quiz-screen" class="hidden">
+        <h2 id="question">Question text</h2>
+        <div class="answers" id="answers"></div>
+        <div class="controls">
+          <button class="btn" id="next-btn" disabled>Next</button>
+        </div>
+      </div>
+
+      <div id="score-screen" class="hidden">
+        <h1>Your Score</h1>
+        <p id="score-text"></p>
+        <button class="btn" id="restart-btn">Restart</button>
+      </div>
+    </div>
+
+    <script>
+      // Quiz questions
+      const questions = [
+        {
+          question: "What is the capital of France?",
+          answers: ["Berlin", "Madrid", "Paris", "Rome"],
+          correctIndex: 2,
+        },
+        {
+          question: "Which planet is known as the Red Planet?",
+          answers: ["Mars", "Jupiter", "Venus", "Saturn"],
+          correctIndex: 0,
+        },
+        {
+          question: "Who wrote the play 'Romeo and Juliet'?",
+          answers: [
+            "William Shakespeare",
+            "Mark Twain",
+            "Jane Austen",
+            "Charles Dickens",
+          ],
+          correctIndex: 0,
+        },
+      ];
+
+      let currentQuestionIndex = 0;
+      let score = 0;
+      let answered = false;
+
+      const startBtn = document.getElementById("start-btn");
+      const nextBtn = document.getElementById("next-btn");
+      const restartBtn = document.getElementById("restart-btn");
+
+      const startScreen = document.getElementById("start-screen");
+      const quizScreen = document.getElementById("quiz-screen");
+      const scoreScreen = document.getElementById("score-screen");
+
+      const questionEl = document.getElementById("question");
+      const answersEl = document.getElementById("answers");
+      const scoreText = document.getElementById("score-text");
+
+      startBtn.addEventListener("click", startQuiz);
+      nextBtn.addEventListener("click", nextQuestion);
+      restartBtn.addEventListener("click", restartQuiz);
+
+      function startQuiz() {
+        startScreen.classList.add("hidden");
+        quizScreen.classList.remove("hidden");
+        currentQuestionIndex = 0;
+        score = 0;
+        loadQuestion();
+      }
+
+      function loadQuestion() {
+        answered = false;
+        nextBtn.disabled = true;
+        clearAnswers();
+        const q = questions[currentQuestionIndex];
+        questionEl.innerText = q.question;
+        q.answers.forEach((ans, i) => {
+          const btn = document.createElement("button");
+          btn.classList.add("btn");
+          btn.innerText = ans;
+          btn.addEventListener("click", () => selectAnswer(i));
+          answersEl.appendChild(btn);
+        });
+      }
+
+      function selectAnswer(index) {
+        if (answered) return; // Prevent multiple selections
+        answered = true;
+        const q = questions[currentQuestionIndex];
+        const buttons = answersEl.querySelectorAll("button");
+        buttons.forEach((btn, i) => {
+          if (i === q.correctIndex) {
+            btn.classList.add("correct");
+          } else if (i === index) {
+            btn.classList.add("incorrect");
+          }
+          btn.disabled = true;
+        });
+        if (index === q.correctIndex) score++;
+        nextBtn.disabled = false;
+      }
+
+      function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+          loadQuestion();
+        } else {
+          showScore();
+        }
+      }
+
+      function showScore() {
+        quizScreen.classList.add("hidden");
+        scoreScreen.classList.remove("hidden");
+        scoreText.innerText = `You answered ${score} out of ${questions.length} correctly!`;
+      }
+
+      function restartQuiz() {
+        scoreScreen.classList.add("hidden");
+        startScreen.classList.remove("hidden");
+      }
+
+      function clearAnswers() {
+        answersEl.innerHTML = "";
+      }
+    </script>
+  </body>
+</html>
